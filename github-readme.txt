@@ -20,7 +20,7 @@ repository to be saved - I put it into my folder for this class
 git clone https://github.com/alex-maleno/BTCMiningCO2Footprint.git
     - You may be prompted to enter your username and password at this step, or
     it may prompt you later. Once prompted, enter your GitHub username and the 
-    token you generated in step 1 
+    token you generated in step 1 as your password.
 
 4. You are all set! If you type "ls" in the command line, you should see the folder
 named "BTCMiningCO2Footprint"
