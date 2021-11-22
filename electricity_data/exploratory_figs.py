@@ -61,67 +61,97 @@ for i in range(len(gen_list)):
 # First Figure: 4-panel stacked area plots of a single year of generation (2020)
 # Panels are east, west, ERCOT, and total US
 
-# roll_wind, roll_solar, roll_petroleum, roll_other, roll_nuclear, roll_natural_gas, roll_hydro, roll_coal = [[np.nan,np.nan,np.nan,np.nan] for i in range(8)]
-# for i in range(7):
-#     roll_must_run[i] = final_must_run.iloc[:,i].rolling(24,min_periods=1).mean().tolist()
-#     roll_imports[i] = final_imports.iloc[:,i].rolling(24,min_periods=1).mean().tolist()
-#     roll_fossil[i] = final_fossil.iloc[:,i].rolling(24,min_periods=1).mean().tolist()
-#     roll_hydro[i] = final_hydro.iloc[:,i].rolling(24,min_periods=1).mean().tolist()
-#     roll_wind[i] = final_wind.iloc[:,i].rolling(24,min_periods=1).mean().tolist()
-#     roll_solar[i] = final_solar.iloc[:,i].rolling(24,min_periods=1).mean().tolist()
-#     roll_bat_dis[i] = final_bat_dis.iloc[:,i].rolling(24,min_periods=1).mean().tolist()
-#     roll_load[i] = final_load.iloc[:,i].rolling(24,min_periods=1).mean().tolist()
+roll_wind, roll_solar, roll_petroleum, roll_other, roll_nuclear, roll_natural_gas, roll_hydro, roll_coal = [[np.nan,np.nan,np.nan,np.nan] for i in range(8)]
+for i in range(4):
+    roll_wind[i] = final_wind.iloc[:,i].rolling(24,min_periods=1).mean().tolist()
+    roll_solar[i] = final_solar.iloc[:,i].rolling(24,min_periods=1).mean().tolist()
+    roll_petroleum[i] = final_petroleum.iloc[:,i].rolling(24,min_periods=1).mean().tolist()
+    roll_other[i] = final_other.iloc[:,i].rolling(24,min_periods=1).mean().tolist()
+    roll_nuclear[i] = final_nuclear.iloc[:,i].rolling(24,min_periods=1).mean().tolist()
+    roll_natural_gas[i] = final_natural_gas.iloc[:,i].rolling(24,min_periods=1).mean().tolist()
+    roll_hydro[i] = final_hydro.iloc[:,i].rolling(24,min_periods=1).mean().tolist()
+    roll_coal[i] = final_coal.iloc[:,i].rolling(24,min_periods=1).mean().tolist()
 
-# ### CREATE FIGURE ###
-# plt.rcParams.update(plt.rcParamsDefault)
-# fig = plt.figure(constrained_layout=False, figsize = (12,15))
-# #set constrained_layout=False and use wspace and hspace params to set amount of width/height reserved for space between subplots
-# gs = fig.add_gridspec(7,1, height_ratios = [1,1,1,1,1,1,1], hspace=.32)
-# ax1 = fig.add_subplot(gs[0])
-# ax2 = fig.add_subplot(gs[1])
-# ax3 = fig.add_subplot(gs[2])
-# ax4 = fig.add_subplot(gs[3])
-# ax5 = fig.add_subplot(gs[4])
-# ax6 = fig.add_subplot(gs[5])
-# ax7 = fig.add_subplot(gs[6])
-# axlist = [ax1,ax2,ax3,ax4,ax5,ax6,ax7]
-# lw = 6
-# plt.style.use('seaborn-white')
-# ax7.plot([],[],color='m', label='Battery', linewidth=lw,alpha=1)
-# ax7.plot([],[],color='orange', label='Solar', linewidth=lw,alpha=1)
-# ax7.plot([],[],color='c', label='Wind', linewidth=lw,alpha=1)
-# ax7.plot([],[],color='b', label='Hydro', linewidth=lw,alpha=1)
-# ax7.plot([],[],color='r', label='Fossil', linewidth=lw,alpha=1)
-# ax7.plot([],[],color='g', label='Imports', linewidth=lw,alpha=1)
-# ax7.plot([],[],color='grey', label='Must run', linewidth=lw,alpha=1)
-# ax7.legend(loc='center', bbox_to_anchor=(.5,-0.55), ncol=4, prop=dict(weight='bold', size=16))
-# # Daily rolling mean data plot
-# ax1.stackplot(range(8736),roll_must_run[0],roll_imports[0],roll_fossil[0],roll_hydro[0],roll_wind[0],roll_solar[0],roll_bat_dis[0],\
-#                colors=['grey','g','r','b','c','orange','m'], alpha=1)
-# ax2.stackplot(range(8736),roll_must_run[1],roll_imports[1],roll_fossil[1],roll_hydro[1],roll_wind[1],roll_solar[1],roll_bat_dis[1],\
-#                colors=['grey','g','r','b','c','orange','m'], alpha=1)
-# ax3.stackplot(range(8736),roll_must_run[2],roll_imports[2],roll_fossil[2],roll_hydro[2],roll_wind[2],roll_solar[2],roll_bat_dis[2],\
-#                colors=['grey','g','r','b','c','orange','m'], alpha=1)
-# ax4.stackplot(range(8736),roll_must_run[3],roll_imports[3],roll_fossil[3],roll_hydro[3],roll_wind[3],roll_solar[3],roll_bat_dis[3],\
-#                colors=['grey','g','r','b','c','orange','m'], alpha=1)
-# ax5.stackplot(range(8736),roll_must_run[4],roll_imports[4],roll_fossil[4],roll_hydro[4],roll_wind[4],roll_solar[4],roll_bat_dis[4],\
-#                colors=['grey','g','r','b','c','orange','m'], alpha=1)
-# ax6.stackplot(range(8736),roll_must_run[5],roll_imports[5],roll_fossil[5],roll_hydro[5],roll_wind[5],roll_solar[5],roll_bat_dis[5],\
-#                colors=['grey','g','r','b','c','orange','m'], alpha=1)
-# ax7.stackplot(range(8736),roll_must_run[6],roll_imports[6],roll_fossil[6],roll_hydro[6],roll_wind[6],roll_solar[6],roll_bat_dis[6],\
-#                colors=['grey','g','r','b','c','orange','m'], alpha=1)
-# lfs=13
-# for a in range(7):
-#     axlist[a].set_xlim(0,8735)
-#     axlist[a].set_ylim(0,np.max([roll_load[i] for i in range(4)])*1.1)
-#     axlist[a].set_xticks([0,744,1416,2160,2880,3624,4344,5088,5832,6552,7296,8016,8735])
-#     axlist[a].set_xticklabels(['Jan 1','Feb 1','Mar 1','Apr 1','May 1','Jun 1','Jul 1','Aug 1','Sep 1','Oct 1','Nov 1','Dec 1','Dec 31'], fontsize=lfs, fontweight='bold', rotation =15)
-#     axlist[a].set_yticks([0,10000,20000,30000,40000])
-#     axlist[a].set_yticklabels(['0','10','20','30','40'], fontsize=lfs, fontweight='bold')
-#     axlist[a].set_ylabel('Demand (GW)', fontsize=14, fontweight='bold')
-#     axlist[a].annotate('#{} - 2050'.format(str(fy[a])),(100,np.max([roll_load[i] for i in range(4)])*.88),fontsize=20, fontweight='bold')
+### CREATE FIGURE ###
+plt.rcParams.update(plt.rcParamsDefault)
+fig = plt.figure(constrained_layout=False, figsize = (14,10))
+#set constrained_layout=False and use wspace and hspace params to set amount of width/height reserved for space between subplots
+gs = fig.add_gridspec(4,1, height_ratios = [1,1,1,1], hspace=.32)
+ax1 = fig.add_subplot(gs[0])
+ax2 = fig.add_subplot(gs[1])
+ax3 = fig.add_subplot(gs[2])
+ax4 = fig.add_subplot(gs[3])
+axlist = [ax1,ax2,ax3,ax4]
+lw = 6
+plt.style.use('seaborn-white')
+ax4.plot([],[],color='orange', label='Solar', linewidth=lw,alpha=1)
+ax4.plot([],[],color='c', label='Wind', linewidth=lw,alpha=1)
+ax4.plot([],[],color='b', label='Hydro', linewidth=lw,alpha=1)
+ax4.plot([],[],color='m', label='Natural Gas', linewidth=lw,alpha=1)
+ax4.plot([],[],color='k', label='Coal', linewidth=lw,alpha=1)
+ax4.plot([],[],color='r', label='Petroleum', linewidth=lw,alpha=1)
+ax4.plot([],[],color='green', label='Nuclear', linewidth=lw,alpha=1)
+ax4.plot([],[],color='grey', label='Other', linewidth=lw,alpha=1)
+ax4.legend(loc='center', bbox_to_anchor=(.5,-0.55), ncol=4, prop=dict(weight='bold', size=16))
+# Daily rolling mean data plot
+ax1.stackplot(range(8784),roll_other[0],roll_nuclear[0],roll_petroleum[0],roll_coal[0],roll_natural_gas[0],roll_hydro[0],roll_wind[0],roll_solar[0],\
+                colors=['grey','green','r','k','m','b','c','orange'], alpha=1)
+ax2.stackplot(range(8784),roll_other[1],roll_nuclear[1],roll_petroleum[1],roll_coal[1],roll_natural_gas[1],roll_hydro[1],roll_wind[1],roll_solar[1],\
+                colors=['grey','green','r','k','m','b','c','orange'], alpha=1)
+ax3.stackplot(range(8784),roll_other[2],roll_nuclear[2],roll_petroleum[2],roll_coal[2],roll_natural_gas[2],roll_hydro[2],roll_wind[2],roll_solar[2],\
+                colors=['grey','green','r','k','m','b','c','orange'], alpha=1)
+ax4.stackplot(range(8784),roll_other[3],roll_nuclear[3],roll_petroleum[3],roll_coal[3],roll_natural_gas[3],roll_hydro[3],roll_wind[3],roll_solar[3],\
+                colors=['grey','green','r','k','m','b','c','orange'], alpha=1)
+lfs=13
+fy = ['Eastern Interconnection','Western Interconnection','ERCOT (Texas)','United States Lower 48']
+ax1.set_yticks([0,100000,200000,300000,400000])
+ax1.set_yticklabels(['0','100','200','300','400'], fontsize=lfs, fontweight='bold')
+ax2.set_yticks([0,25000,50000,75000,100000])
+ax2.set_yticklabels(['0','25','50','75','100'], fontsize=lfs, fontweight='bold')
+ax3.set_yticks([0,20000,40000,60000])
+ax3.set_yticklabels(['0','20','40','60'], fontsize=lfs, fontweight='bold')
+ax4.set_yticks([0,100000,200000,300000,400000,500000])
+ax4.set_yticklabels(['0','100','200','300','400','500'], fontsize=lfs, fontweight='bold')
+for a in range(4):
+    axlist[a].set_xlim(0,8784)
+    axlist[a].set_xticks([0,744,1416,2160,2880,3624,4344,5088,5832,6552,7296,8016,8784])
+    axlist[a].set_xticklabels(['Jan 1','Feb 1','Mar 1','Apr 1','May 1','Jun 1','Jul 1','Aug 1','Sep 1','Oct 1','Nov 1','Dec 1','Dec 31'], fontsize=lfs, fontweight='bold', rotation =15)
+    axlist[a].set_ylabel('Demand (GW)', fontsize=14, fontweight='bold')
+    axlist[a].annotate('{}'.format(str(fy[a])),(1300,axlist[a].get_ylim()[1]*.85),fontsize=14, fontweight='bold')
 
-# fig.suptitle('Stacked Area Plot for 2020',fontsize=20, fontweight='bold',y=0.90)
-# plt.savefig('figs/stacked_area_2020.png', bbox_inches='tight', dpi=300)
-# plt.clf()
-# plt.rcParams.update(plt.rcParamsDefault)
+fig.suptitle('Stacked Area Plot for 2020',fontsize=20, fontweight='bold',y=0.916)
+plt.savefig('figs/stacked_area_2020.png', bbox_inches='tight', dpi=300)
+plt.clf()
+plt.rcParams.update(plt.rcParamsDefault)
+
+
+
+### Next Figure: Focus on one week in WECC in August (9th?)
+fig, ax = plt.subplots(constrained_layout=False, figsize = (6,6))
+plt.style.use('seaborn-white')
+ax.plot([],[],color='orange', label='Solar', linewidth=lw,alpha=1)
+ax.plot([],[],color='c', label='Wind', linewidth=lw,alpha=1)
+ax.plot([],[],color='b', label='Hydro', linewidth=lw,alpha=1)
+ax.plot([],[],color='m', label='Natural Gas', linewidth=lw,alpha=1)
+ax.plot([],[],color='k', label='Coal', linewidth=lw,alpha=1)
+ax.plot([],[],color='r', label='Petroleum', linewidth=lw,alpha=1)
+ax.plot([],[],color='green', label='Nuclear', linewidth=lw,alpha=1)
+ax.plot([],[],color='grey', label='Other', linewidth=lw,alpha=1)
+ax.legend(loc='center', bbox_to_anchor=(1.2,.55), prop=dict(weight='bold', size=12))
+# ax.stackplot(range(5280,5448),final_other.iloc[:,0][5280:5448],final_nuclear.iloc[:,0][5280:5448],final_petroleum.iloc[:,0][5280:5448],final_coal.iloc[:,0][5280:5448],final_natural_gas.iloc[:,0][5280:5448],final_hydro.iloc[:,0][5280:5448],final_wind.iloc[:,0][5280:5448],final_solar.iloc[:,0][5280:5448],\
+#                 colors=['grey','green','r','k','m','b','c','orange'], alpha=1)
+ax.stackplot(range(5280,5448),final_other.iloc[:,1][5280:5448],final_nuclear.iloc[:,1][5280:5448],final_petroleum.iloc[:,1][5280:5448],final_coal.iloc[:,1][5280:5448],final_natural_gas.iloc[:,1][5280:5448],final_hydro.iloc[:,1][5280:5448],final_wind.iloc[:,1][5280:5448],final_solar.iloc[:,1][5280:5448],\
+                colors=['grey','green','r','k','m','b','c','orange'], alpha=1)
+# ax.stackplot(range(5280,5448),final_other.iloc[:,2][5280:5448],final_nuclear.iloc[:,2][5280:5448],final_petroleum.iloc[:,2][5280:5448],final_coal.iloc[:,2][5280:5448],final_natural_gas.iloc[:,2][5280:5448],final_hydro.iloc[:,2][5280:5448],final_wind.iloc[:,2][5280:5448],final_solar.iloc[:,2][5280:5448],\
+#                 colors=['grey','green','r','k','m','b','c','orange'], alpha=1)
+# ax.stackplot(range(5280,5448),final_other.iloc[:,3][5280:5448],final_nuclear.iloc[:,3][5280:5448],final_petroleum.iloc[:,3][5280:5448],final_coal.iloc[:,3][5280:5448],final_natural_gas.iloc[:,3][5280:5448],final_hydro.iloc[:,3][5280:5448],final_wind.iloc[:,3][5280:5448],final_solar.iloc[:,3][5280:5448],\
+#                 colors=['grey','green','r','k','m','b','c','orange'], alpha=1)
+ax.set_xlim(5280,5447)
+ax.set_ylim(0,135000)
+ax.set_title('Stacked Area Plot - Western Interconnection - 2020', fontweight='bold', fontsize=16)
+ax.set_yticks([0,25000,50000,75000,100000,125000])
+ax.set_yticklabels(['0','25','50','75','100','125'], fontsize=10, fontweight='bold')
+ax.set_xticks([5280,5304,5328,5352,5376,5400,5424,5447])
+ax.set_xticklabels(['August 9th','August 10th','August 11th','August 12th','August 13th','August 14th','August 15th','August 16th'], fontweight='bold',fontsize=10, rotation=30)
+ax.set_ylabel('Demand (GW)', fontsize=14, fontweight='bold')
+plt.savefig('figs/stacked_area_week.png', bbox_inches='tight', dpi=300)
