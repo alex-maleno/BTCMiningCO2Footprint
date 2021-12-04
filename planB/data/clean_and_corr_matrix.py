@@ -72,6 +72,15 @@ data.TENURE.replace(3,0,inplace=True)
 #OMB13CBSA replace 99999 with rural (0) and all others with urban (1)
 data.OMB13CBSA.replace(99999,0,inplace=True)
 data.loc[data.OMB13CBSA > 1, 'OMB13CBSA'] = 1
+#ACPRIMARY replace 12 (no AC) with 0
+data.ACPRIMARY.replace(12,0,inplace=True)
+#HEATFUEL replace 10 (no heat) with 0
+data.HEATFUEL.replace(10,0,inplace=True)
+#HEATTYPE replace 13 (no heat) with 0 and 14 with 13 to move next value up
+data.HEATTYPE.replace(13,0,inplace=True)
+data.HEATTYPE.replace(14,13,inplace=True)
+#HOTWATER replace 7 (no hot running water) with 0
+data.HOTWATER.replace(7,0,inplace=True)
 
 data.to_csv('cleaned_data.csv')
 
