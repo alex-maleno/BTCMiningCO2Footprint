@@ -21,8 +21,6 @@ predictors = ['ACPRIMARY','ADEQUACY','BLD','CONDO','COOKFUEL','DISHH','DIVISION'
                           'RENTCNTRL','SOLAR','STORIES','TENURE','TOTROOMS','UNITSIZE','WATERAMT','YRBUILT']
     
 data = raw_data[predictors]
-#data.replace("'-6'",np.nan, inplace=True)
-#data.replace("'-9'",np.nan, inplace=True)
 
 str_cols = ['ACPRIMARY','ADEQUACY','BLD','CONDO','COOKFUEL','DISHH','DIVISION','FIREPLACE',\
               'HEATFUEL','HEATTYPE','HHCITSHP','HHGRAD','HHRACE','HOTWATER','HUDSUB',\
@@ -35,11 +33,15 @@ for col in str_cols:
         print('Data already converted.')
     print(col,'column complete.')
 
-    
+
 #replace -6s (not applicable) and -9s (not available) with nan
 data.replace(-6, np.nan, inplace=True)
 data.replace(-9, np.nan, inplace=True)
 
+# drop rows where income and/or electricity bill are not reported or n/a,
+# and where electricity bill is included with rent or other bill (unable to calculated burden)
+data.ELECAMT.replace(2,np.nan,inplace=True)
+data = data.dropna(subset=['HINCP','ELECAMT'])
 
 ### Cleaning columns for needed variables
 #replace 2s with 0s in CONDO, DISHH, RENTCNTRL, SOLAR (change binary coding from 1/2 to 0/1 with 0 being No)
@@ -50,7 +52,7 @@ data.SOLAR.replace(2,0,inplace=True)
 #replace 5s with 0s in COOKFUEL (0 being no cooking fuel)
 data.COOKFUEL.replace(5,0,inplace=True)
 #replace ELECAMT nan's and (1,2,3) with 0
-data.ELECAMT.replace([1,2,3,np.nan],0,inplace=True)
+data.ELECAMT.replace([1,3],0,inplace=True)
 data.WATERAMT.replace([1,2,3,np.nan],0,inplace=True)
 #HUDSUB replace 3 and nan with 0, and replace 2 with 1
 data.HUDSUB.replace([3,np.nan],0,inplace=True)
@@ -87,7 +89,7 @@ data.to_csv('cleaned_data.csv')
 
 ######################################
 
-numerical_cols = ['BLD','ELECAMT','HHAGE','HHGRAD','HHMOVE','HINCP','MAINTAMT','MARKETVAL','NUMELDERS','NUMPEOPLE','NUMYNGKIDS',\
+numerical_cols = ['BLD','HHAGE','HHGRAD','HHMOVE','MAINTAMT','MARKETVAL','NUMELDERS','NUMPEOPLE','NUMYNGKIDS',\
                       'NUMOLDKIDS','PERPOVLVL','RATINGNH','RATINGHS','STORIES','TOTROOMS','UNITSIZE','WATERAMT','YRBUILT']
     
 corr_cols = data[numerical_cols]
