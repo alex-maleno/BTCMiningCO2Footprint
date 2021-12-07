@@ -16,8 +16,9 @@ for col in cleaned_data.columns:
     
 df = pd.DataFrame(count, index=cleaned_data.columns)
 
-cleaned_data = cleaned_data.drop(columns=['RENTCNTRL'])
-cleaned_data = cleaned_data.dropna(subset=['SOLAR','NUMCARE','NUMERRND','DISHH','RATINGHS','RATINGNH','UNITSIZE'])
+#cleaned_data = cleaned_data.drop(columns=['RENTCNTRL'])
+#cleaned_data = cleaned_data.dropna(subset=['SOLAR','NUMCARE','NUMERRND','DISHH','RATINGHS','RATINGNH','UNITSIZE'])
+cleaned_data = cleaned_data.dropna(subset=['SOLAR','UNITSIZE'])
 
 count2=[]
 for col in cleaned_data.columns:
@@ -25,6 +26,10 @@ for col in cleaned_data.columns:
     
 df2 = pd.DataFrame(count2, index=cleaned_data.columns)
 
-cleaned_data = cleaned_data.drop(columns=['MARKETVAL','MAINTAMT'])
+cleaned_data['BURDEN'] = ((cleaned_data.ELECAMT+\
+                            cleaned_data.OILAMT+\
+                            cleaned_data.GASAMT+\
+                            cleaned_data.OTHERAMT)\
+                            *12)/cleaned_data.HINCP
 
 cleaned_data.to_csv('cleaned_data_v2.csv')

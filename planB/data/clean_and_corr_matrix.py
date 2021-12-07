@@ -14,17 +14,25 @@ import matplotlib.pyplot as plt
 raw_data = pd.read_csv('ahs2019n.csv')
 print('Data read')
 
-predictors = ['ACPRIMARY','ADEQUACY','BLD','CONDO','COOKFUEL','DISHH','DIVISION','ELECAMT','FIREPLACE',\
-              'HEATFUEL','HEATTYPE','HHAGE','HHCITSHP','HHGRAD','HHMOVE','HHRACE','HINCP',\
-                  'HOTWATER','HUDSUB','MAINTAMT','MARKETVAL','MILHH','NUMCARE','NUMELDERS','NUMERRND',\
-                      'NUMPEOPLE','NUMYNGKIDS','NUMOLDKIDS','OMB13CBSA','PERPOVLVL','RATINGNH','RATINGHS',\
-                          'RENTCNTRL','SOLAR','STORIES','TENURE','TOTROOMS','UNITSIZE','WATERAMT','YRBUILT']
+# predictors = ['ACPRIMARY','ADEQUACY','BLD','CONDO','COOKFUEL','DISHH','DIVISION','ELECAMT','FIREPLACE',\
+#               'HEATFUEL','HEATTYPE','HHAGE','HHCITSHP','HHGRAD','HHMOVE','HHRACE','HINCP',\
+#                   'HOTWATER','HUDSUB','MAINTAMT','MARKETVAL','MILHH','NUMCARE','NUMELDERS','NUMERRND',\
+#                       'NUMPEOPLE','NUMYNGKIDS','NUMOLDKIDS','OMB13CBSA','PERPOVLVL','RATINGNH','RATINGHS',\
+#                           'RENTCNTRL','SOLAR','STORIES','TENURE','TOTROOMS','UNITSIZE','WATERAMT','YRBUILT']
+
+predictors = ['ACPRIMARY','BLD','COOKFUEL','DIVISION','FIREPLACE','HEATFUEL','HEATTYPE','HHRACE','HOTWATER',\
+              'NUMELDERS','NUMYNGKIDS','NUMOLDKIDS','OMB13CBSA','SOLAR','TENURE','UNITSIZE','YRBUILT',\
+                  'HINCP','OTHERAMT','OILAMT','GASAMT','ELECAMT']
     
 data = raw_data[predictors]
 
-str_cols = ['ACPRIMARY','ADEQUACY','BLD','CONDO','COOKFUEL','DISHH','DIVISION','FIREPLACE',\
-              'HEATFUEL','HEATTYPE','HHCITSHP','HHGRAD','HHRACE','HOTWATER','HUDSUB',\
-                  'MILHH','NUMCARE','NUMERRND','OMB13CBSA','RENTCNTRL','SOLAR','TENURE','UNITSIZE']
+# str_cols = ['ACPRIMARY','ADEQUACY','BLD','CONDO','COOKFUEL','DISHH','DIVISION','FIREPLACE',\
+#               'HEATFUEL','HEATTYPE','HHCITSHP','HHGRAD','HHRACE','HOTWATER','HUDSUB',\
+#                   'MILHH','NUMCARE','NUMERRND','OMB13CBSA','RENTCNTRL','SOLAR','TENURE','UNITSIZE']
+
+str_cols = ['ACPRIMARY','BLD','COOKFUEL','DIVISION','FIREPLACE','HEATFUEL','HEATTYPE','HHRACE','HOTWATER',\
+                'OMB13CBSA','SOLAR','TENURE','UNITSIZE']
+    
 for col in str_cols:
     try:
         for i in range(len(data)):
@@ -41,34 +49,39 @@ data.replace(-9, np.nan, inplace=True)
 # drop rows where income and/or electricity bill are not reported or n/a,
 # and where electricity bill is included with rent or other bill (unable to calculated burden)
 data.ELECAMT.replace(2,np.nan,inplace=True)
-data = data.dropna(subset=['HINCP','ELECAMT'])
+data.OTHERAMT.replace(2,np.nan,inplace=True)
+data.OILAMT.replace(2,np.nan,inplace=True)
+data.GASAMT.replace(2,np.nan,inplace=True)
+data = data.dropna(subset=['HINCP','ELECAMT','OTHERAMT','OILAMT','GASAMT'])
 
 ### Cleaning columns for needed variables
 #replace 2s with 0s in CONDO, DISHH, RENTCNTRL, SOLAR (change binary coding from 1/2 to 0/1 with 0 being No)
-data.CONDO.replace(2,0,inplace=True)
-data.DISHH.replace(2,0,inplace=True)
-data.RENTCNTRL.replace(2,0,inplace=True)
+#data.CONDO.replace(2,0,inplace=True)
+#data.DISHH.replace(2,0,inplace=True)
+#data.RENTCNTRL.replace(2,0,inplace=True)
 data.SOLAR.replace(2,0,inplace=True)
 #replace 5s with 0s in COOKFUEL (0 being no cooking fuel)
 data.COOKFUEL.replace(5,0,inplace=True)
 #replace ELECAMT nan's and (1,2,3) with 0
 data.ELECAMT.replace([1,3],0,inplace=True)
-data.WATERAMT.replace([1,2,3,np.nan],0,inplace=True)
+data.OILAMT.replace([1,3],0,inplace=True)
+data.GASAMT.replace([1,3],0,inplace=True)
+data.OTHERAMT.replace([1,3],0,inplace=True)
 #HUDSUB replace 3 and nan with 0, and replace 2 with 1
-data.HUDSUB.replace([3,np.nan],0,inplace=True)
-data.HUDSUB.replace(2,1,inplace=True)
+#data.HUDSUB.replace([3,np.nan],0,inplace=True)
+#data.HUDSUB.replace(2,1,inplace=True)
 #FIREPLACE replace 4's with 0's and (1,2,3) with 1
 data.FIREPLACE.replace([2,3],1,inplace=True)
 data.FIREPLACE.replace(4,0,inplace=True)
 #MILHH replace 6 with 0's (no one in military) and (1,2,3,4,5) with 1 (at least one person active or veteran)
-data.MILHH.replace(6,0,inplace=True)
-data.MILHH.replace([2,3,4,5],1,inplace=True)
+#data.MILHH.replace(6,0,inplace=True)
+#data.MILHH.replace([2,3,4,5],1,inplace=True)
 #NUMCARE replace (2,3) with 1 (at least one person with this disability) and 1's with 0's (no one has it)
-data.NUMCARE.replace(1,0,inplace=True)
-data.NUMCARE.replace([2,3],1,inplace=True)
+#data.NUMCARE.replace(1,0,inplace=True)
+#data.NUMCARE.replace([2,3],1,inplace=True)
 #NUMERRND replace (2,3) with 1 (at least one person with difficulty doing errands) and 1's with 0's (no one has it)
-data.NUMERRND.replace(1,0,inplace=True)
-data.NUMERRND.replace([2,3],1,inplace=True)
+#data.NUMERRND.replace(1,0,inplace=True)
+#data.NUMERRND.replace([2,3],1,inplace=True)
 #TENURE replace 3's with 0's (occupied without payment)
 data.TENURE.replace(3,0,inplace=True)
 #OMB13CBSA replace 99999 with rural (0) and all others with urban (1)
@@ -89,8 +102,7 @@ data.to_csv('cleaned_data.csv')
 
 ######################################
 
-numerical_cols = ['BLD','HHAGE','HHGRAD','HHMOVE','MAINTAMT','MARKETVAL','NUMELDERS','NUMPEOPLE','NUMYNGKIDS',\
-                      'NUMOLDKIDS','PERPOVLVL','RATINGNH','RATINGHS','STORIES','TOTROOMS','UNITSIZE','WATERAMT','YRBUILT']
+numerical_cols = ['BLD','NUMELDERS','NUMYNGKIDS','NUMOLDKIDS','UNITSIZE','YRBUILT']
     
 corr_cols = data[numerical_cols]
 corr = corr_cols.corr()
