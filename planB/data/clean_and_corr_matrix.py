@@ -85,8 +85,10 @@ data.FIREPLACE.replace(4,0,inplace=True)
 #TENURE replace 3's with 0's (occupied without payment)
 data.TENURE.replace(3,0,inplace=True)
 #OMB13CBSA replace 99999 with rural (0) and all others with urban (1)
+data.METRO = data.OMB13CBSA.values.tolist()
 data.OMB13CBSA.replace(99999,0,inplace=True)
 data.loc[data.OMB13CBSA > 1, 'OMB13CBSA'] = 1
+data.rename(columns={'OMB13CBSA':'URBAN'})
 #ACPRIMARY replace 12 (no AC) with 0
 data.ACPRIMARY.replace(12,0,inplace=True)
 #HEATFUEL replace 10 (no heat) with 0
@@ -102,23 +104,79 @@ data.to_csv('cleaned_data.csv')
 
 ######################################
 
-numerical_cols = ['BLD','NUMELDERS','NUMYNGKIDS','NUMOLDKIDS','UNITSIZE','YRBUILT']
+# numerical_cols = ['BLD','NUMELDERS','NUMYNGKIDS','NUMOLDKIDS','UNITSIZE','YRBUILT']
     
-corr_cols = data[numerical_cols]
-corr = corr_cols.corr()
-mask = np.zeros_like(corr)
-mask[np.triu_indices_from(mask)] = True
+# corr_cols = data[numerical_cols]
+# corr = corr_cols.corr()
+# mask = np.zeros_like(corr)
+# mask[np.triu_indices_from(mask)] = True
 
-# Construct a heatmap of the correlation matrix
-# Note "annot = True" shows the correlation coefficient in each cell
-fig, ax = plt.subplots(figsize=(15,10))
-sns.heatmap(corr, ax=ax,
-        xticklabels=corr.columns,
-        yticklabels=corr.columns,
-        mask = mask, cmap="YlGnBu",
-        annot=True)
-plt.savefig('num_corr_matrix.png',dpi=300)
-
-
+# # Construct a heatmap of the correlation matrix
+# # Note "annot = True" shows the correlation coefficient in each cell
+# fig, ax = plt.subplots(figsize=(15,10))
+# sns.heatmap(corr, ax=ax,
+#         xticklabels=corr.columns,
+#         yticklabels=corr.columns,
+#         mask = mask, cmap="YlGnBu",
+#         annot=True)
+# plt.savefig('num_corr_matrix.png',dpi=300)
 
 
+
+cleaned_data = pd.read_csv('cleaned_data.csv')
+
+count=[]
+for col in cleaned_data.columns:
+    count.append(cleaned_data[col].isna().sum())
+    
+df = pd.DataFrame(count, index=cleaned_data.columns)
+
+cleaned_data = cleaned_data.dropna(subset=['SOLAR','UNITSIZE'])
+
+count2=[]
+for col in cleaned_data.columns:
+    count2.append(cleaned_data[col].isna().sum())
+    
+df2 = pd.DataFrame(count2, index=cleaned_data.columns)
+
+cleaned_data['BURDEN'] = ((cleaned_data.ELECAMT+\
+                            cleaned_data.OILAMT+\
+                            cleaned_data.GASAMT+\
+                            cleaned_data.OTHERAMT)\
+                            *12)/cleaned_data.HINCP
+
+cleaned_data.to_csv('cleaned_data_v2.csv')
+
+###############################################################################
+
+
+from sklearn.preprocessing import OneHotEncoder
+
+data = pd.read_csv('cleaned_data_v2.csv').drop(columns=['Unnamed: 0','Unnamed: 0.1'])
+
+data.drop(data.loc[data['BLD']==10].index, inplace=True)
+data = data.reset_index()
+
+data.ACPRIMARY.replace(4,3,inplace=True)
+data.ACPRIMARY.replace(5,4,inplace=True)
+data.ACPRIMARY.replace(6,5,inplace=True)
+data.ACPRIMARY.replace(7,6,inplace=True)
+data.ACPRIMARY.replace([8,9,10,11],7,inplace=True)
+data.HHRACE.replace([7,8,9,10,11,12,13,14,15,18,20],6,inplace=True)
+
+data.drop(columns='index').to_csv('final_cleaned_data.csv')
+
+# use one hot encoding to convert categorical variables into series of binary variables
+non_binary_cat_vars = ['ACPRIMARY','BLD','COOKFUEL','DIVISION','HEATFUEL','HEATTYPE','HHRACE','HOTWATER','TENURE']
+
+cat_df = data[non_binary_cat_vars].copy(deep=True)
+
+enc = OneHotEncoder()
+enc.fit(cat_df)
+onehotlabels = enc.transform(cat_df).toarray()
+one_hot_df = pd.DataFrame(onehotlabels, columns=enc.get_feature_names_out())
+
+# recombine dataframes
+final_data = pd.concat([one_hot_df,data.drop(columns=non_binary_cat_vars)], axis=1)
+
+final_data.to_csv('final_cleaned_dummy_data.csv')
