@@ -22,7 +22,7 @@ print('Data read')
 
 predictors = ['ACPRIMARY','BLD','COOKFUEL','DIVISION','FIREPLACE','HEATFUEL','HEATTYPE','HHRACE','HOTWATER',\
               'NUMELDERS','NUMYNGKIDS','NUMOLDKIDS','OMB13CBSA','SOLAR','TENURE','UNITSIZE','YRBUILT',\
-                  'HINCP','OTHERAMT','OILAMT','GASAMT','ELECAMT']
+                  'HINCP','OTHERAMT','OILAMT','GASAMT','ELECAMT','NUMPEOPLE']
     
 data = raw_data[predictors]
 
