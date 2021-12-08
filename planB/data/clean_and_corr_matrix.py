@@ -85,10 +85,10 @@ data.FIREPLACE.replace(4,0,inplace=True)
 #TENURE replace 3's with 0's (occupied without payment)
 data.TENURE.replace(3,0,inplace=True)
 #OMB13CBSA replace 99999 with rural (0) and all others with urban (1)
-data.METRO = data.OMB13CBSA.values.tolist()
+data['METRO'] = data.OMB13CBSA.values.tolist()
 data.OMB13CBSA.replace(99999,0,inplace=True)
 data.loc[data.OMB13CBSA > 1, 'OMB13CBSA'] = 1
-data.rename(columns={'OMB13CBSA':'URBAN'})
+data = data.rename(columns={'OMB13CBSA':'URBAN'})
 #ACPRIMARY replace 12 (no AC) with 0
 data.ACPRIMARY.replace(12,0,inplace=True)
 #HEATFUEL replace 10 (no heat) with 0
