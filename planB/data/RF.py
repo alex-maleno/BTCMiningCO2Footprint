@@ -32,6 +32,11 @@ one_hot_df = pd.DataFrame(onehotlabels, columns=enc.get_feature_names_out())
 final_data_li = pd.concat([one_hot_df,data_li.drop(columns=non_binary_cat_vars)], axis=1)
 
 data.drop(data.loc[data['HINCP']==0].index, inplace=True)
+
+data.drop(data.loc[data['BURDEN']>1.3068144].index, inplace=True)
+data.drop(data.loc[data['BURDEN']<=0].index, inplace=True)
+#data.drop(data.loc[data['BURDEN']<=0.0070588235].index, inplace=True) #5th percentile
+
 final_data_li.drop(final_data_li.loc[final_data_li['HINCP']==0].index, inplace=True)
 
 # ### 3.2.2 Random Forest
@@ -50,97 +55,26 @@ final_data_li.drop(final_data_li.loc[final_data_li['HINCP']==0].index, inplace=T
 # Print out the best parameters. Fit a model called rf_tree with the best parameters and print out the score (average accuracy)
 # of the model for both the training and validation data.
 
-features_demo_all = ['HHRACE_1.0', 'HHRACE_2.0', 'HHRACE_3.0',\
-                     'HHRACE_4.0', 'HHRACE_5.0', 'HHRACE_6.0','TENURE_0.0', 'TENURE_1.0', 'TENURE_2.0',\
-                     'NUMELDERS', 'NUMYNGKIDS', 'NUMOLDKIDS', 'URBAN']
-
-features_demo_rural = ['HHRACE_1.0', 'HHRACE_2.0', 'HHRACE_3.0',\
-                     'HHRACE_4.0', 'HHRACE_5.0', 'HHRACE_6.0','TENURE_0.0', 'TENURE_1.0', 'TENURE_2.0',\
-                     'NUMELDERS', 'NUMYNGKIDS', 'NUMOLDKIDS']
     
-features_demo_urban = ['HHRACE_1.0', 'HHRACE_2.0', 'HHRACE_3.0',\
-                     'HHRACE_4.0', 'HHRACE_5.0', 'HHRACE_6.0','TENURE_0.0', 'TENURE_1.0', 'TENURE_2.0',\
-                     'NUMELDERS', 'NUMYNGKIDS', 'NUMOLDKIDS']
+features_all = data.drop(columns=['HINCP','OTHERAMT','GASAMT','OILAMT','ELECAMT','NUMPEOPLE','METRO','BURDEN'])
+features_all_urban = data[data.URBAN==1].drop(columns=['HINCP','OTHERAMT','GASAMT','OILAMT','ELECAMT','NUMPEOPLE','METRO','BURDEN','URBAN'])
+features_all_rural = data[data.URBAN==0].drop(columns=['HINCP','OTHERAMT','GASAMT','OILAMT','ELECAMT','NUMPEOPLE','METRO','BURDEN','URBAN'])
 
-features_house_all = ['ACPRIMARY_0', 'ACPRIMARY_1', 'ACPRIMARY_2', 'ACPRIMARY_3', 'ACPRIMARY_4',\
-                      'ACPRIMARY_5', 'ACPRIMARY_6', 'ACPRIMARY_7', 'BLD_1', 'BLD_2', 'BLD_3', 'BLD_4',\
-                      'BLD_5', 'BLD_6', 'BLD_7', 'BLD_8', 'BLD_9', 'COOKFUEL_0', 'COOKFUEL_1',\
-                      'COOKFUEL_2', 'COOKFUEL_3', 'COOKFUEL_4', 'HEATFUEL_0', 'HEATFUEL_1', 'HEATFUEL_2',\
-                      'HEATFUEL_3', 'HEATFUEL_4', 'HEATFUEL_5', 'HEATFUEL_6', 'HEATFUEL_7', 'HEATFUEL_8',\
-                      'HEATFUEL_9', 'HEATTYPE_0', 'HEATTYPE_1', 'HEATTYPE_2', 'HEATTYPE_3', 'HEATTYPE_4',\
-                      'HEATTYPE_5', 'HEATTYPE_6', 'HEATTYPE_7', 'HEATTYPE_8', 'HEATTYPE_9', 'HEATTYPE_10',\
-                      'HEATTYPE_11', 'HEATTYPE_12', 'HEATTYPE_13', 'HOTWATER_0', 'HOTWATER_1', 'HOTWATER_2',\
-                      'HOTWATER_3', 'HOTWATER_4', 'HOTWATER_5', 'HOTWATER_6', 'FIREPLACE', 'SOLAR', 'UNITSIZE', 'YRBUILT', 'URBAN']
-
-features_house_rural = ['ACPRIMARY_0', 'ACPRIMARY_1', 'ACPRIMARY_2', 'ACPRIMARY_3', 'ACPRIMARY_4',\
-                      'ACPRIMARY_5', 'ACPRIMARY_6', 'ACPRIMARY_7', 'BLD_1', 'BLD_2', 'BLD_3', 'BLD_4',\
-                      'BLD_5', 'BLD_6', 'BLD_7', 'BLD_8', 'BLD_9', 'COOKFUEL_0', 'COOKFUEL_1',\
-                      'COOKFUEL_2', 'COOKFUEL_3', 'COOKFUEL_4', 'HEATFUEL_0', 'HEATFUEL_1', 'HEATFUEL_2',\
-                      'HEATFUEL_3', 'HEATFUEL_4', 'HEATFUEL_5', 'HEATFUEL_6', 'HEATFUEL_7', 'HEATFUEL_8',\
-                      'HEATFUEL_9', 'HEATTYPE_0', 'HEATTYPE_1', 'HEATTYPE_2', 'HEATTYPE_3', 'HEATTYPE_4',\
-                      'HEATTYPE_5', 'HEATTYPE_6', 'HEATTYPE_7', 'HEATTYPE_8', 'HEATTYPE_9', 'HEATTYPE_10',\
-                      'HEATTYPE_11', 'HEATTYPE_12', 'HEATTYPE_13', 'HOTWATER_0', 'HOTWATER_1', 'HOTWATER_2',\
-                      'HOTWATER_3', 'HOTWATER_4', 'HOTWATER_5', 'HOTWATER_6', 'FIREPLACE', 'SOLAR', 'UNITSIZE', 'YRBUILT']
-
-features_house_urban = ['ACPRIMARY_0', 'ACPRIMARY_1', 'ACPRIMARY_2', 'ACPRIMARY_3', 'ACPRIMARY_4',\
-                      'ACPRIMARY_5', 'ACPRIMARY_6', 'ACPRIMARY_7', 'BLD_1', 'BLD_2', 'BLD_3', 'BLD_4',\
-                      'BLD_5', 'BLD_6', 'BLD_7', 'BLD_8', 'BLD_9', 'COOKFUEL_0', 'COOKFUEL_1',\
-                      'COOKFUEL_2', 'COOKFUEL_3', 'COOKFUEL_4', 'HEATFUEL_0', 'HEATFUEL_1', 'HEATFUEL_2',\
-                      'HEATFUEL_3', 'HEATFUEL_4', 'HEATFUEL_5', 'HEATFUEL_6', 'HEATFUEL_7', 'HEATFUEL_8',\
-                      'HEATFUEL_9', 'HEATTYPE_0', 'HEATTYPE_1', 'HEATTYPE_2', 'HEATTYPE_3', 'HEATTYPE_4',\
-                      'HEATTYPE_5', 'HEATTYPE_6', 'HEATTYPE_7', 'HEATTYPE_8', 'HEATTYPE_9', 'HEATTYPE_10',\
-                      'HEATTYPE_11', 'HEATTYPE_12', 'HEATTYPE_13', 'HOTWATER_0', 'HOTWATER_1', 'HOTWATER_2',\
-                      'HOTWATER_3', 'HOTWATER_4', 'HOTWATER_5', 'HOTWATER_6', 'FIREPLACE', 'SOLAR', 'UNITSIZE', 'YRBUILT']
-    
-features_house_li = ['ACPRIMARY_0', 'ACPRIMARY_1', 'ACPRIMARY_2', 'ACPRIMARY_3', 'ACPRIMARY_4',\
-                      'ACPRIMARY_5', 'ACPRIMARY_6', 'ACPRIMARY_7', 'BLD_1', 'BLD_2', 'BLD_3', 'BLD_4',\
-                      'BLD_5', 'BLD_6', 'BLD_7', 'BLD_8', 'BLD_9', 'COOKFUEL_0', 'COOKFUEL_1',\
-                      'COOKFUEL_2', 'COOKFUEL_3', 'COOKFUEL_4', 'HEATFUEL_0', 'HEATFUEL_1', 'HEATFUEL_2',\
-                      'HEATFUEL_3', 'HEATFUEL_4', 'HEATFUEL_5', 'HEATFUEL_6', 'HEATFUEL_7',\
-                      'HEATFUEL_9', 'HEATTYPE_0', 'HEATTYPE_1', 'HEATTYPE_2', 'HEATTYPE_3', 'HEATTYPE_4',\
-                      'HEATTYPE_5', 'HEATTYPE_6', 'HEATTYPE_7', 'HEATTYPE_8', 'HEATTYPE_9', 'HEATTYPE_10',\
-                      'HEATTYPE_11', 'HEATTYPE_12', 'HEATTYPE_13', 'HOTWATER_0', 'HOTWATER_1', 'HOTWATER_2',\
-                      'HOTWATER_3', 'HOTWATER_4', 'HOTWATER_5', 'HOTWATER_6', 'FIREPLACE', 'SOLAR', 'UNITSIZE', 'YRBUILT']
-    
-features_all = data.drop(columns=['HINCP','OTHERAMT','GASAMT','OILAMT','ELECAMT','NUMPEOPLE','METRO','BURDEN',\
-'DIVISION_1','DIVISION_2','DIVISION_3','DIVISION_4','DIVISION_5',\
-    'DIVISION_6','DIVISION_7','DIVISION_8','DIVISION_9'])
-features_all_urban = data[data.URBAN==1].drop(columns=['HINCP','OTHERAMT','GASAMT','OILAMT','ELECAMT','NUMPEOPLE','METRO','BURDEN',\
-'DIVISION_1','DIVISION_2','DIVISION_3','DIVISION_4','DIVISION_5',\
-    'DIVISION_6','DIVISION_7','DIVISION_8','DIVISION_9'])
-features_all_rural = data[data.URBAN==0].drop(columns=['HINCP','OTHERAMT','GASAMT','OILAMT','ELECAMT','NUMPEOPLE','METRO','BURDEN',\
-'DIVISION_1','DIVISION_2','DIVISION_3','DIVISION_4','DIVISION_5',\
-    'DIVISION_6','DIVISION_7','DIVISION_8','DIVISION_9'])
+# categorical only
+#features_all_rural = data[data.URBAN==0].drop(columns=['HINCP','OTHERAMT','GASAMT','OILAMT','ELECAMT','NUMPEOPLE','METRO','BURDEN','URBAN',\
+#                                                       'NUMELDERS', 'NUMYNGKIDS', 'NUMOLDKIDS', 'UNITSIZE', 'YRBUILT'])
 
 features_all_rural_li = final_data_li[final_data_li.URBAN==0].drop(columns=['HINCP','OTHERAMT','GASAMT','OILAMT','ELECAMT','NUMPEOPLE',\
                                                                             'METRO','BURDEN','HHAGE','NUMKIDS', 'POVTHRESH', 'LITHRESH',\
-                                                                            'DIVISION_1','DIVISION_2','DIVISION_3','DIVISION_4','DIVISION_5',\
-                                                                                'DIVISION_6','DIVISION_7','DIVISION_8','DIVISION_9','URBAN'])
+                                                                            'URBAN'])
 features_all_urban_li = final_data_li[final_data_li.URBAN==1].drop(columns=['HINCP','OTHERAMT','GASAMT','OILAMT','ELECAMT','NUMPEOPLE',\
-                                                                            'METRO','BURDEN','HHAGE','NUMKIDS', 'POVTHRESH', 'LITHRESH',\
-                                                                            'DIVISION_1','DIVISION_2','DIVISION_3','DIVISION_4','DIVISION_5',\
-                                                                                'DIVISION_6','DIVISION_7','DIVISION_8','DIVISION_9','URBAN'])
+                                                                            'METRO','BURDEN','HHAGE','NUMKIDS', 'POVTHRESH', 'LITHRESH'])
 features_all_li = final_data_li.drop(columns=['HINCP','OTHERAMT','GASAMT','OILAMT','ELECAMT','NUMPEOPLE',\
-                                                                            'METRO','BURDEN','HHAGE','NUMKIDS', 'POVTHRESH', 'LITHRESH',\
-                                                                            'DIVISION_1','DIVISION_2','DIVISION_3','DIVISION_4','DIVISION_5',\
-                                                                                'DIVISION_6','DIVISION_7','DIVISION_8','DIVISION_9','URBAN'])
+                                                                            'METRO','BURDEN','HHAGE','NUMKIDS', 'POVTHRESH', 'LITHRESH'])
+
+    
 
 ###############################################################################
-
-### RURAL ONLY, DEMOGRAPHIC FEATURES, ALL INCOME, ALL REGIONS
-target = data[data.URBAN==0]['BURDEN']
-# split test set
-X, X_test, y, y_test = train_test_split(data[data.URBAN==0][features_demo_rural], target, random_state = 1, test_size = .2)
-
-### URBAN ONLY, DEMOGRAPHIC FEATURES, ALL INCOME, ALL REGIONS
-target = data[data.URBAN==1]['BURDEN']
-# split test set
-X, X_test, y, y_test = train_test_split(data[data.URBAN==1][features_demo_urban], target, random_state = 1, test_size = .2)
-
-### BOTH URBAN AND RURAL, DEMOGRAPHIC FEATURES, ALL INCOME, ALL REGIONS
-target = data['BURDEN']
-# split test set
-X, X_test, y, y_test = train_test_split(data[features_demo_all], target, random_state = 1, test_size = .2)
 
 ### RURAL ONLY, ALL FEATURES, ALL INCOME, ALL REGIONS
 target = data[data.URBAN==0]['BURDEN']
@@ -157,69 +91,22 @@ target = data['BURDEN']
 # split test set
 X, X_test, y, y_test = train_test_split(features_all, target, random_state = 1, test_size = .2)
 
-### RURAL ONLY, HOUSING FEATURES, ALL INCOME, ALL REGIONS
-target = data[data.URBAN==0]['BURDEN']
-# split test set
-X, X_test, y, y_test = train_test_split(data[data.URBAN==0][features_house_rural], target, random_state = 1, test_size = .2)
+# ########## LOW INCOME TESTS ##########
 
-### URBAN ONLY, HOUSING FEATURES, ALL INCOME, ALL REGIONS
-target = data[data.URBAN==1]['BURDEN']
-# split test set
-X, X_test, y, y_test = train_test_split(data[data.URBAN==1][features_house_urban], target, random_state = 1, test_size = .2)
+# ### RURAL ONLY, ALL FEATURES, LOW INCOME, ALL REGIONS
+# target = final_data_li[final_data_li.URBAN==0]['BURDEN']
+# # split test set
+# X, X_test, y, y_test = train_test_split(features_all_rural_li, target, random_state = 1, test_size = .2)
 
-### BOTH URBAN AND RURAL, HOUSING FEATURES, ALL INCOME, ALL REGIONS
-target = data['BURDEN']
-# split test set
-X, X_test, y, y_test = train_test_split(data[features_house_all], target, random_state = 1, test_size = .2)
+# ### URBAN ONLY, ALL FEATURES, LOW INCOME, ALL REGIONS
+# target = final_data_li[final_data_li.URBAN==1]['BURDEN']
+# # split test set
+# X, X_test, y, y_test = train_test_split(features_all_urban_li, target, random_state = 1, test_size = .2)
 
-########## LOW INCOME TESTS ##########
-
-### RURAL ONLY, ALL FEATURES, LOW INCOME, ALL REGIONS
-target = final_data_li[final_data_li.URBAN==0]['BURDEN']
-# split test set
-X, X_test, y, y_test = train_test_split(features_all_rural_li, target, random_state = 1, test_size = .2)
-
-### URBAN ONLY, ALL FEATURES, LOW INCOME, ALL REGIONS
-target = final_data_li[final_data_li.URBAN==1]['BURDEN']
-# split test set
-X, X_test, y, y_test = train_test_split(features_all_urban_li, target, random_state = 1, test_size = .2)
-
-### BOTH URBAN AND RURAL, ALL FEATURES, LOW INCOME, ALL REGIONS
-target = final_data_li['BURDEN']
-# split test set
-X, X_test, y, y_test = train_test_split(features_all_li, target, random_state = 1, test_size = .2)
-
-### RURAL ONLY, DEMOGRAPHIC FEATURES, LOW INCOME, ALL REGIONS
-target = final_data_li[final_data_li.URBAN==0]['BURDEN']
-# split test set
-X, X_test, y, y_test = train_test_split(final_data_li[final_data_li.URBAN==0][features_demo_rural], target, random_state = 1, test_size = .2)
-
-### URBAN ONLY, DEMOGRAPHIC FEATURES, LOW INCOME, ALL REGIONS
-target = final_data_li[final_data_li.URBAN==1]['BURDEN']
-# split test set
-X, X_test, y, y_test = train_test_split(final_data_li[final_data_li.URBAN==1][features_demo_urban], target, random_state = 1, test_size = .2)
-
-### BOTH URBAN AND RURAL, DEMOGRAPHIC FEATURES, LOW INCOME, ALL REGIONS
-target = final_data_li['BURDEN']
-# split test set
-X, X_test, y, y_test = train_test_split(final_data_li[features_demo_all], target, random_state = 1, test_size = .2)
-
-### RURAL ONLY, HOUSING FEATURES, LOW INCOME, ALL REGIONS
-target = final_data_li[final_data_li.URBAN==0]['BURDEN']
-# split test set
-X, X_test, y, y_test = train_test_split(final_data_li[final_data_li.URBAN==0][features_house_li], target, random_state = 1, test_size = .2)
-
-### URBAN ONLY, HOUSING FEATURES, LOW INCOME, ALL REGIONS
-target = final_data_li[final_data_li.URBAN==1]['BURDEN']
-# split test set
-X, X_test, y, y_test = train_test_split(final_data_li[final_data_li.URBAN==1][features_house_li], target, random_state = 1, test_size = .2)
-
-### BOTH URBAN AND RURAL, HOUSING FEATURES, LOW INCOME, ALL REGIONS
-target = final_data_li['BURDEN']
-# split test set
-X, X_test, y, y_test = train_test_split(final_data_li[features_house_li+['URBAN']], target, random_state = 1, test_size = .2)
-
-
+# ### BOTH URBAN AND RURAL, ALL FEATURES, LOW INCOME, ALL REGIONS
+# target = final_data_li['BURDEN']
+# # split test set
+# X, X_test, y, y_test = train_test_split(features_all_li, target, random_state = 1, test_size = .2)
 
 # split between train and validation sets
 X_train, X_val, y_train, y_val = train_test_split(X, y, random_state = 1, test_size = 0.2)
@@ -233,10 +120,10 @@ rf_tree.fit(X_train, y_train)
 #               'max_depth': randint(1, 10),
 #               'min_samples_leaf': randint(1, 30),
 #               'min_samples_split': randint(2, 20)}
-param_dist_rf = {'n_estimators': randint(1, 100),
-              'max_leaf_nodes': randint(3, 500),
+param_dist_rf = {'n_estimators': randint(1, 3000),
+              'max_leaf_nodes': randint(3, 200),
               'max_features': ["auto"],
-              'max_depth': randint(1, 40),
+              'max_depth': randint(1, 100),
               'min_samples_leaf': randint(1, 40),
               'min_samples_split': randint(2, 40)}
 
@@ -280,6 +167,7 @@ for f in range(X.shape[1]):
     
 feat_df = pd.DataFrame(feat_imp, columns=['Feature','Importance'])
 feat_df.set_index('Feature',inplace=True)
+feat_df.to_csv('importances.csv')
 feat_df = feat_df.T
 
 # Plot the feature importances of the forest
@@ -287,13 +175,46 @@ plt.figure()
 plt.title("Feature Importances")
 plt.bar(range(X.shape[1]), importances[indices],
         color="r", yerr=std[indices], align="center")
-plt.savefig('feature_importance.png',dpi=300)
+plt.savefig('figs/feature_importance.png',dpi=300)
+plt.clf()
 
 
+### RESIDUALS
 
+plt.scatter(np.arange(len(y)),y-rf_tree.predict(X))
+plt.savefig('figs/residuals.png',dpi=300)
+plt.clf()
+plt.scatter(np.arange(len(y)),np.sort(y-rf_tree.predict(X)))
+plt.savefig('figs/residuals_sorted.png',dpi=300)
+plt.clf()
 
+### PERMUTATION IMPORTANCE
 
+from sklearn.inspection import permutation_importance
+perm_importance = permutation_importance(rf_tree, X_test, y_test)
+sorted_idx = perm_importance.importances_mean.argsort()
+plt.barh(X.columns[sorted_idx], perm_importance.importances_mean[sorted_idx])
+plt.xlabel("Permutation Importance")
+plt.savefig('figs/permutation_importance.png',dpi=300)
 
+### SHAPLEY VALUES
 
+import shap
+explainer = shap.TreeExplainer(rf_tree)
+shap_values = explainer.shap_values(X_test)
+shap.summary_plot(shap_values, X_test, plot_type="bar",show=False)
+plt.savefig('figs/shapley_bar.png',dpi=300, bbox_inches='tight')
+plt.clf()
+shap.summary_plot(shap_values, X_test,show=False)
+plt.savefig('figs/shapley_jitter.png',dpi=300, bbox_inches='tight')
+
+from sklearn.metrics import mean_squared_error
+mse_test = mean_squared_error(y_test,rf_tree.predict(X_test))
+mse_val = mean_squared_error(y_val,rf_tree.predict(X_val))
+print('Test MSE is:',mse_test)
+print('Val MSE is:',mse_val)
+
+# Test and Val MSE
+# Important predictors
 
 
